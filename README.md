@@ -1,160 +1,133 @@
+
 # Inventario de Productos con SQLite
 
 Este proyecto implementa un sistema de inventario de productos en Python, utilizando SQLite para la persistencia de datos. Permite gestionar categorías predefinidas, añadir, buscar, actualizar y eliminar productos, y consultar el número de productos por categoría. Incluye además un conjunto completo de tests con pytest y un script para poblar la base de datos con 1000 productos de ejemplo.
 
 ---
 
-## Tabla de Contenidos
+## 1. Descripción
 
-1. [Descripción](#descripción)  
-2. [Requisitos](#requisitos)  
-3. [Instalación](#instalación)  
-4. [Estructura de ficheros](#estructura-de-ficheros)  
-5. [Inicialización de la base de datos](#inicialización-de-la-base-de-datos)  
-6. [Uso del módulo CRUD](#uso-del-módulo-crud)  
-   - [add_product](#add_product)  
-   - [delete_product](#delete_product)  
-   - [search_product](#search_product)  
-   - [search_category](#search_category)  
-   - [get_categories](#get_categories)  
-   - [update_product](#update_product)  
-7. [Ejecutar tests](#ejecutar-tests)  
-8. [Script para poblar la base con 1000 productos](#script-para-poblar-la-base-con-1000-productos)  
-9. [Ejemplos de uso en línea de comandos](#ejemplos-de-uso-en-línea-de-comandos)  
-10. [Contribuciones](#contribuciones)  
-11. [Licencia](#licencia)  
+Sistema CRUD con persistencia en SQLite, gestión de categorías y productos. Pensado para ser modular y reutilizable en otros proyectos o ampliaciones futuras.
 
 ---
 
-## Descripción
+## 2. Requisitos
 
-Este proyecto ofrece un paquete Python llamado `inventory` que gestiona un inventario de productos. Cada producto tiene:
-
-- **ID** (UUID generado automáticamente).  
-- **Categoría** (una de las predefinidas: `alimentación`, `bebidas`, `electrónica`, `papelería`, `otros`).  
-- **Nombre** (texto).  
-- **Precio** (número real).
-
-Las operaciones disponibles son:
-
-1. **add_product(category, name, price) → product_id**  
-2. **delete_product(product_id) → bool**  
-3. **search_product(name) → List[Dict]**  
-4. **search_category(category) → List[Dict]**  
-5. **get_categories() → Dict[str, int]**  
-6. **update_product(product_id, category?, name?, price?) → bool**
-
-La persistencia se realiza en un fichero SQLite (`data/inventario.db`). Al importar el módulo `inventory.db`, se crean automáticamente las tablas (`categories` y `products`) y se insertan las categorías predefinidas si no existían.
+- Python 3.10+
+- uv (recomendado para entornos virtuales)
+- pytest (para ejecutar los tests)
 
 ---
 
-## Requisitos
+## 3. Instalación
 
-- **Python 3.8+**  
-- Paquetes de la biblioteca estándar:
-  - `sqlite3`  
-  - `os`, `uuid`, `typing`  
-- **pytest** (solo para ejecutar los tests).
+Este proyecto usa [`uv`](https://github.com/astral-sh/uv) como gestor de entornos y dependencias.
 
-Para instalar `pytest`, puedes usar:
+1. Crea el entorno virtual:
+
+   ```bash
+   uv venv
+   uv pip install .
+```
+
+---
+
+## 4. Estructura de ficheros
+
+```
+gestor_inventario/
+├── inventory/
+│   ├── db.py
+│   ├── crud.py
+│   ├── schemas.py
+├── tests/
+│   ├── test_crud.py
+├── data/
+│   └── inventario.db
+├── populate_db.py
+├── requirements.txt
+├── README.md
+```
+
+---
+
+## 5. Inicialización de la base de datos
+
+La base de datos SQLite se crea automáticamente al importar cualquier función del paquete `inventory`. Se almacenará en `data/inventario.db`. Las tablas `categories` y `products` se crean si no existen, y se insertan las categorías predefinidas (`alimentación`, `bebidas`, `electrónica`, `papelería`, `otros`).
+
+---
+
+## 6. Uso del módulo CRUD
+
+### `add_product(category, name, price) -> str`
+
+Inserta un nuevo producto en la base de datos. Si la categoría no está en las predefinidas, se asigna "otros".
+
+### `delete_product(product_id) -> bool`
+
+Elimina un producto según su ID. Devuelve `True` si lo elimina correctamente, `False` si no se encontró.
+
+### `search_product(name) -> List[Dict[str, object]]`
+
+Busca productos cuyo nombre contenga el texto proporcionado (búsqueda parcial).
+
+### `search_category(category) -> List[Dict[str, object]]`
+
+Devuelve los productos de una categoría específica. Si la categoría no existe o no tiene productos, devuelve una lista vacía.
+
+### `get_categories() -> Dict[str, int]`
+
+Devuelve un diccionario con las categorías como claves y el número de productos por cada una.
+
+### `update_product(product_id, category=None, name=None, price=None) -> bool`
+
+Actualiza los campos especificados de un producto. Si todos los campos son `None`, devuelve `False`.
+
+---
+
+## 7. Ejecutar tests
+
+Los tests se encuentran en `tests/test_crud.py`. Ejecuta:
 
 ```bash
-pip install pytest
+pytest
 ```
+
+El sistema utiliza una base de datos temporal para cada test mediante monkeypatching, por lo que no afecta a `inventario.db`.
 
 ---
 
-## Instalación
+## 8. Script para poblar la base con 1000 productos
 
-1. Clona este repositorio en tu máquina local:
+Ejecuta:
 
-   ```bash
-   git clone https://github.com/tu_usuario/mi_inventario.git
-   cd mi_inventario
-   ```
+```bash
+uv run populate_db.py
+```
 
-2. (Opcional) Crea y activa un entorno virtual:
-
-   ```bash
-   python -m venv venv
-   # Windows:
-   venv\Scripts\activate
-   # Linux / macOS:
-   source venv/bin/activate
-   ```
-
-3. Instala pytest para ejecutar los tests:
-
-   ```bash
-   pip install pytest
-   ```
-
-4. (Opcional) Añade otras dependencias al `requirements.txt` (si tuvieras librerías externas).
+Esto poblará `data/inventario.db` con 1000 productos distribuidos entre las categorías predefinidas.
 
 ---
 
-## Estructura de ficheros
+## 9. Ejemplos de uso en línea de comandos
 
-```
-mi_inventario/
-├── data/
-│   └── inventario.db        # Fichero SQLite (se crea automáticamente)
-│
-├── inventory/               # Paquete principal
-│   ├── __init__.py
-│   ├── db.py                # Conexión e inicialización de la BD
-│   ├── schemas.py           # Definición de categorías y sentencias CREATE TABLE
-│   └── crud.py              # Funciones add, delete, search, update, get_categories
-│
-├── tests/                   # Tests automatizados con pytest
-│   └── test_crud.py
-│
-├── populate_db.py           # Script para “popular” la base con 1000 productos
-├── main.py                  # (Opcional) Ejemplo de uso / CLI básica
-├── pytest.ini               # Configuración de pytest (filterwarnings)
-├── README.md                # Este archivo
-└── requirements.txt         # Lista de dependencias (pytest)
+```python
+from inventory.crud import add_product, search_product
+
+pid = add_product("bebidas", "Coca-Cola", 1.20)
+print(search_product("Coca"))
 ```
 
-- **`data/inventario.db`**  
-  Fichero SQLite donde residen las tablas `categories` y `products`. Se crea en la primera ejecución de cualquier función de `inventory`.
+También puedes crear un script CLI como `main.py` con opciones de menú para añadir, buscar, actualizar y borrar productos.
 
-- **`inventory/db.py`**  
-  - Define las rutas (`BASE_DIR`, `DB_DIR`, `DB_PATH`).  
-  - Función `get_connection()` que crea la carpeta `data/` si no existe y retorna un `sqlite3.Connection`.  
-  - Función privada `_initialize_database()` que:
-    1. Ejecuta `CREATE TABLE IF NOT EXISTS` de `categories` y `products`.  
-    2. Inserta (con `INSERT OR IGNORE`) todas las categorías predefinidas (`CATEGORIAS_PREDEFINIDAS`).  
-  - Al final del archivo, se invoca `_initialize_database()` al importar el módulo.
+---
 
-- **`inventory/schemas.py`**  
-  - Lista `CATEGORIAS_PREDEFINIDAS = ["alimentación", "bebidas", "electrónica", "papelería", "otros"]`.  
-  - Constantes `SQL_CREATE_TABLE_CATEGORIES` y `SQL_CREATE_TABLE_PRODUCTS` con las instrucciones SQL para crear las tablas.
+## 10. Contribuciones
 
-- **`inventory/crud.py`**  
-  Implementa las funciones CRUD:
-  1. `add_product(category, name, price) → str`  
-  2. `delete_product(product_id) → bool`  
-  3. `search_product(name) → List[Dict[str, object]]`  
-  4. `search_category(category) → List[Dict[str, object]]`  
-  5. `get_categories() → Dict[str, int]`  
-  6. `update_product(product_id, category?, name?, price?) → bool`
+Las contribuciones están abiertas. Puedes enviar PRs o sugerencias directamente vía GitHub. Se agradece añadir tests para nuevas funcionalidades.
 
-- **`tests/test_crud.py`**  
-  - Fixture `use_temp_db` que parchea `get_connection()` tanto en `db` como en `crud` para que cada test use una base en memoria (fichero temporal).  
-  - Pruebas unitarias para cada función CRUD y tests de flujo integral y bulk insert.
+---
 
-- **`populate_db.py`**  
-  - Script que elimina la base existente (`data/inventario.db`), la inicializa nuevamente y agrega 1000 productos de ejemplo distribuídos uniformemente entre las categorías predefinidas.
+## 11. Licencia
 
-- **`main.py`** (opcional)  
-  - Un posible script de demostración o CLI que importe las funciones de `inventory.crud` y permita interacción básica desde consola.
-
-- **`pytest.ini`**  
-  Configura pytest para filtrar los `DeprecationWarning` de `pytest_freezegun`:
-  ```ini
-  [pytest]
-  filterwarnings =
-      ignore::DeprecationWarning:pytest_freezegun
-  ```
-
+MIT © 2025 Juanjo Expósito.
