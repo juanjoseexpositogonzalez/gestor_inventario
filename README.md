@@ -28,7 +28,7 @@ Este proyecto usa [`uv`](https://github.com/astral-sh/uv) como gestor de entorno
    ```bash
    uv venv
    uv pip install .
-```
+   ```
 
 ---
 
